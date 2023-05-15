@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import logging
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE
@@ -10,55 +11,87 @@ from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from sklearn.metrics import classification_report, precision_recall_curve, auc
 
+# Create a custom logger
+logger = logging.getLogger(__name__)
+
+# Set the level of logger
+logger.setLevel(logging.DEBUG)
+
+# Create handlers
+c_handler = logging.StreamHandler()  # console handler
+f_handler = logging.FileHandler('logfile.log')  # file handler
+c_handler.setLevel(logging.WARNING)
+f_handler.setLevel(logging.ERROR)
+
+# Create formatters and add it to handlers
+c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+c_handler.setFormatter(c_format)
+f_handler.setFormatter(f_format)
+
+# Add handlers to the logger
+logger.addHandler(c_handler)
+logger.addHandler(f_handler)
+
+
 class CreditCardFraudDetection:
     def __init__(self, filepath):
         """
         Class constructor. Initializes the file path and loads the data into a pandas dataframe.
-        
+
         Parameters:
         filepath (str): Path to the .csv file containing the data.
         """
         self.filepath = filepath
-        self.data = pd.read_csv(filepath)
+        try:
+            self.data = pd.read_csv(filepath)
+            logger.info(f"Data loaded successfully from {filepath}")
+        except Exception as e:
+            logger.error("Error occurred while loading data.")
+            logger.exception(e)
 
     def explore_data(self):
         """
         Explore the data by printing various statistics and plots.
         """
-        # Print the first few rows of the data
-        print("First few rows of the data:")
-        print(self.data.head())
-        print()
+        try:
+            # Print the first few rows of the data
+            logger.info("First few rows of the data:")
+            print(self.data.head())
+            print()
 
-        # Print the data types and non-null counts of the columns
-        print("Data types and non-null counts of the columns:")
-        print(self.data.info())
-        print()
+            # Print the data types and non-null counts of the columns
+            logger.info("Data types and non-null counts of the columns:")
+            print(self.data.info())
+            print()
 
-        # Print the number of missing values in each column
-        print("Number of missing values in each column:")
-        print(self.data.isnull().sum())
-        print()
+            # Print the number of missing values in each column
+            logger.info("Number of missing values in each column:")
+            print(self.data.isnull().sum())
+            print()
 
-        # Print the number of unique values in each column
-        print("Number of unique values in each column:")
-        print(self.data.nunique())
-        print()
+            # Print the number of unique values in each column
+            logger.info("Number of unique values in each column:")
+            print(self.data.nunique())
+            print()
 
-        # Print the correlation matrix
-        print("Correlation matrix:")
-        print(self.data.corr())
-        print()
+            # Print the correlation matrix
+            logger.info("Correlation matrix:")
+            print(self.data.corr())
+            print()
 
-        # Print some basic statistics of the numerical variables
-        print("Basic statistics of the numerical variables:")
-        print(self.data.describe())
-        print()
+            # Print some basic statistics of the numerical variables
+            logger.info("Basic statistics of the numerical variables:")
+            print(self.data.describe())
+            print()
 
-        # Plot histograms for each variable
-        print("Histograms for each variable:")
-        self.data.hist(figsize=(20, 20))
-        plt.show()
+            # Plot histograms for each variable
+            logger.info("Plotting histograms for each variable:")
+            self.data.hist(figsize=(20, 20))
+            plt.show()
+        except Exception as e:
+            logger.error("Error occurred while exploring data.")
+            logger.exception(e)
 
 
     def visualize_data(self):
