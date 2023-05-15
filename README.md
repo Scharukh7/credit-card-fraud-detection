@@ -82,7 +82,7 @@ The models are evaluated using cross-validation and the Area Under the ROC Curve
 
 ## Conclusion
 
-This script provides a basic pipeline for credit card fraud detection. However, it can be extended in various ways to improve performance. For example, you could try different methods for handling class imbalance, feature engineering to create new features, or try different machine learning models.
+This script provides a basic pipeline for credit card fraud detection. However, it can be extended in various ways to improve performance. For example, could try different methods for handling class imbalance, feature engineering to create new features, or try different machine learning models.
 
 ## Improvements for Better Results
 
