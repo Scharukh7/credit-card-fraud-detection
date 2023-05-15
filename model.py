@@ -132,87 +132,96 @@ class CreditCardFraudDetection:
         """
         Split the data into training and testing sets.
         """
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        return X_train, X_test, y_train, y_test
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            return X_train, X_test, y_train, y_test
+        except Exception as e:
+            logger.error("Error occurred while splitting data.")
+            logger.exception(e)
 
     def scale_data(self, X_train, X_test):
         """
         Scale the features using StandardScaler.
         """
-        # Define the feature names
-        feature_names = X_train.columns.tolist()
-        
-        # Create a scaler object
-        scaler = StandardScaler()
-        
-        # Fit the scaler to the training data and transform it
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_train_scaled = pd.DataFrame(X_train_scaled, columns=feature_names)
-        
-        # Use the fitted scaler to transform the test data
-        X_test_scaled = scaler.transform(X_test)
-        X_test_scaled = pd.DataFrame(X_test_scaled, columns=feature_names)
+        try:
+            # Define the feature names
+            feature_names = X_train.columns.tolist()
+            
+            # Create a scaler object
+            scaler = StandardScaler()
+            
+            # Fit the scaler to the training data and transform it
+            X_train_scaled = scaler.fit_transform(X_train)
+            X_train_scaled = pd.DataFrame(X_train_scaled, columns=feature_names)
+            
+            # Use the fitted scaler to transform the test data
+            X_test_scaled = scaler.transform(X_test)
+            X_test_scaled = pd.DataFrame(X_test_scaled, columns=feature_names)
 
-        return X_train_scaled, X_test_scaled
+            return X_train_scaled, X_test_scaled
+        except Exception as e:
+            logger.error("Error occurred while scaling data.")
+            logger.exception(e)
 
     def build_evaluate_models(self, X_train, y_train, X_test, y_test):
         """
         Build and evaluate models using cross-validation and compute feature importance.
         """
-        # Define models
-        models = [
-            ('LogisticRegression', LogisticRegression(max_iter=1000, random_state=42)),
-            ('RandomForest', RandomForestClassifier(random_state=42)),
-            ('XGBoost', XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42))
-        ]
+        try:
+            # Define models
+            models = [
+                ('LogisticRegression', LogisticRegression(max_iter=1000, random_state=42)),
+                ('RandomForest', RandomForestClassifier(random_state=42)),
+                ('XGBoost', XGBClassifier(eval_metric='logloss', random_state=42))
+            ]
 
-        # Cross-validation and performance comparison
-        for name, model in models:
-            scores = cross_val_score(model, X_train, y_train, cv=5, scoring='roc_auc')
-            print(f'{name} AUC: {scores.mean():.2f} (+/- {scores.std() * 2:.2f})')
+            # Cross-validation and performance comparison
+            for name, model in models:
+                scores = cross_val_score(model, X_train, y_train, cv=5, scoring='roc_auc')
+                print(f'{name} AUC: {scores.mean():.2f} (+/- {scores.std() * 2:.2f})')
 
-            # Fit the model and make predictions
-            model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
+                # Fit the model and make predictions
+                model.fit(X_train, y_train)
+                y_pred = model.predict(X_test)
 
-            # Evaluate the model
-            print(classification_report(y_test, y_pred))
+                # Evaluate the model
+                print(classification_report(y_test, y_pred))
 
-            # Compute and plot Precision-Recall curve
-            precision, recall, _ = precision_recall_curve(y_test, y_pred)
-            plt.plot(recall, precision)
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.title(f'Precision-Recall curve for {name}')
-            plt.show()
-
-            # Compute Area Under the Precision-Recall Curve (AUPRC)
-            print('AUPRC:', auc(recall, precision))
-
-            # Feature importance 
-            if name == 'RandomForest':
-                # Get feature importances
-                importances = model.feature_importances_
-                features = X_train.columns  # get feature names from the training data
-
-                # Create a DataFrame for visualization
-                feature_importances = pd.DataFrame({'feature': features, 'importance': importances})
-
-                # Sort by importance
-                feature_importances = feature_importances.sort_values('importance', ascending=False)
-
-                # Plot feature importances
-                plt.figure(figsize=(10, 8))
-                sns.barplot(x='importance', y='feature', data=feature_importances)
-                plt.title('Feature Importance')
-                plt.xlabel('Importance')
-                plt.ylabel('Feature')
+                # Compute and plot Precision-Recall curve
+                precision, recall, _ = precision_recall_curve(y_test, y_pred)
+                plt.plot(recall, precision)
+                plt.xlabel('Recall')
+                plt.ylabel('Precision')
+                plt.title(f'Precision-Recall curve for {name}')
                 plt.show()
 
+                # Compute Area Under the Precision-Recall Curve (AUPRC)
+                print('AUPRC:', auc(recall, precision))
+
+                # Feature importance 
+                if name == 'RandomForest':
+                    # Get feature importances
+                    importances = model.feature_importances_
+                    features = X_train.columns  # get feature names from the training data
+
+                    # Create a DataFrame for visualization
+                    feature_importances = pd.DataFrame({'feature': features, 'importance': importances})
+
+                    # Sort by importance
+                    feature_importances = feature_importances.sort_values('importance', ascending=False)
+
+                    # Plot feature importances
+                    plt.figure(figsize=(10, 8))
+                    sns.barplot(x='importance', y='feature', data=feature_importances)
+                    plt.title('Feature Importance')
+                    plt.xlabel('Importance')
+                    plt.ylabel('Feature')
+                    plt.show()
+        except Exception as e:
+            logger.error("Error occurred while building or evaluating models.")
+            logger.exception(e)
 
 # usage:
-
 try:
     detector = CreditCardFraudDetection('creditcard.csv')
     detector.explore_data()
