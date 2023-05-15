@@ -64,7 +64,7 @@ Note: The script assumes that the dataset is in a file named creditcard.csv in t
 
 ## Data Description
 
-The dataset contains numerical input variables V1 to V28 which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, we cannot provide the original features and more background information about the data. Features that have not been transformed with PCA are 'Time' and 'Amount'. 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-sensitive learning. The 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
+The dataset contains numerical input variables V1 to V28 which are the result of a PCA transformation. Features that have not been transformed with PCA are 'Time' and 'Amount'. 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-sensitive learning. The 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
 
 ## Model Explanation
 
