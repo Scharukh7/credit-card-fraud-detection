@@ -70,16 +70,21 @@ class CreditCardFraudDetection:
         plt.show()
 
     def handle_imbalance(self):
-        """
-        Handle class imbalance using SMOTE.
-        """
-        X = self.data.drop('Class', axis=1)
-        y = self.data['Class']
+            """
+            Handle class imbalance using SMOTE.
+            """
+            X = self.data.drop('Class', axis=1)
+            y = self.data['Class']
 
-        sm = SMOTE(random_state=42)
-        X_res, y_res = sm.fit_resample(X, y)
+            sm = SMOTE(random_state=42)
+            X_res, y_res = sm.fit_resample(X, y)
 
-        return X_res, y_res
+            # Convert resampled data back to dataframes, maintaining column names
+            X_res = pd.DataFrame(X_res, columns=X.columns)
+            y_res = pd.Series(y_res, name=y.name)
+
+            return X_res, y_res
+
 
     def split_data(self, X, y):
         """
@@ -93,17 +98,26 @@ class CreditCardFraudDetection:
         """
         Scale the features using StandardScaler.
         """
+        # Define the feature names
+        feature_names = X_train.columns.tolist()
+        
+        # Create a scaler object
         scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
+        
+        # Fit the scaler to the training data and transform it
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_train_scaled = pd.DataFrame(X_train_scaled, columns=feature_names)
+        
+        # Use the fitted scaler to transform the test data
+        X_test_scaled = scaler.transform(X_test)
+        X_test_scaled = pd.DataFrame(X_test_scaled, columns=feature_names)
 
-        return X_train, X_test
+        return X_train_scaled, X_test_scaled
 
     def build_evaluate_models(self, X_train, y_train, X_test, y_test):
         """
         Build and evaluate models using cross-validation and compute feature importance.
         """
-
         # Define models
         models = [
             ('LogisticRegression', LogisticRegression(max_iter=1000, random_state=42)),
@@ -113,11 +127,11 @@ class CreditCardFraudDetection:
 
         # Cross-validation and performance comparison
         for name, model in models:
-            model.fit(X_train, y_train)
             scores = cross_val_score(model, X_train, y_train, cv=5, scoring='roc_auc')
             print(f'{name} AUC: {scores.mean():.2f} (+/- {scores.std() * 2:.2f})')
 
-            # Make predictions
+            # Fit the model and make predictions
+            model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
             # Evaluate the model
@@ -138,7 +152,7 @@ class CreditCardFraudDetection:
             if name == 'RandomForest':
                 # Get feature importances
                 importances = model.feature_importances_
-                features = self.data.columns[:-1]  # assuming 'Class' is the last column
+                features = X_train.columns  # get feature names from the training data
 
                 # Create a DataFrame for visualization
                 feature_importances = pd.DataFrame({'feature': features, 'importance': importances})
