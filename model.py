@@ -98,14 +98,19 @@ class CreditCardFraudDetection:
         """
         Visualize the class distributions.
         """
-        sns.countplot(x='Class', data=self.data)
-        plt.title('Class Distributions \n (0: No Fraud || 1: Fraud)', fontsize=14)
-        plt.show()
+        try:
+            sns.countplot(x='Class', data=self.data)
+            plt.title('Class Distributions \n (0: No Fraud || 1: Fraud)', fontsize=14)
+            plt.show()
+        except Exception as e:
+            logger.error("Error occurred while visualizing data.")
+            logger.exception(e)
 
     def handle_imbalance(self):
-            """
-            Handle class imbalance using SMOTE.
-            """
+        """
+        Handle class imbalance using SMOTE.
+        """
+        try:
             X = self.data.drop('Class', axis=1)
             y = self.data['Class']
 
@@ -117,6 +122,10 @@ class CreditCardFraudDetection:
             y_res = pd.Series(y_res, name=y.name)
 
             return X_res, y_res
+        except Exception as e:
+            logger.error("Error occurred while handling imbalance.")
+            logger.exception(e)
+
 
 
     def split_data(self, X, y):
@@ -204,12 +213,15 @@ class CreditCardFraudDetection:
 
 # usage:
 
-detector = CreditCardFraudDetection('creditcard.csv')
-detector.explore_data()
-detector.visualize_data()
+try:
+    detector = CreditCardFraudDetection('creditcard.csv')
+    detector.explore_data()
+    detector.visualize_data()
 
-X, y = detector.handle_imbalance()
-X_train, X_test, y_train, y_test = detector.split_data(X, y)
-X_train, X_test = detector.scale_data(X_train, X_test)
-detector.build_evaluate_models(X_train, y_train, X_test, y_test)
-
+    X, y = detector.handle_imbalance()
+    X_train, X_test, y_train, y_test = detector.split_data(X, y)
+    X_train, X_test = detector.scale_data(X_train, X_test)
+    detector.build_evaluate_models(X_train, y_train, X_test, y_test)
+except Exception as e:
+    logger.error("Error occurred while detecting fraud.")
+    logger.exception(e)
